@@ -3,7 +3,7 @@ package usecase
 import (
 	"time"
 
-	e "github.com/juunys/go-webcrawler/entity"
+	e "github.com/juunys/go-webcrawler/sync/entity"
 	"github.com/mmcdole/gofeed"
 )
 

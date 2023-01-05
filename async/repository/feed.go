@@ -1,7 +1,7 @@
 package repository
 
 import (
-	e "github.com/juunys/go-webcrawler/sync/entity"
+	e "github.com/juunys/go-webcrawler/async/entity"
 )
 
 type HabitRepository interface {

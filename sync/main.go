@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/juunys/go-webcrawler/common"
-	"github.com/juunys/go-webcrawler/entity"
+	"github.com/juunys/go-webcrawler/sync/entity"
 	"github.com/juunys/go-webcrawler/sync/repository"
 	"github.com/juunys/go-webcrawler/sync/usecase"
 	_ "github.com/mattn/go-sqlite3"

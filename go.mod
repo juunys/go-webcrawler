@@ -4,10 +4,7 @@ go 1.18
 
 require github.com/mattn/go-sqlite3 v1.14.16
 
-require (
-	github.com/mawenbao/gofeed v0.1.2
-	github.com/mmcdole/gofeed v1.1.3
-)
+require github.com/mmcdole/gofeed v1.1.3
 
 require (
 	github.com/PuerkitoBio/goquery v1.5.1 // indirect
