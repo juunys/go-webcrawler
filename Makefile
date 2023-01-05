@@ -11,4 +11,4 @@ s:
 	(cd sync; go run main.go)
 
 a:
-	(cd /async; go run main.go)
+	(cd async; go run main.go)

@@ -59,35 +59,19 @@ func NewFeedRepository(db *sql.DB) *FeedRepository {
 	}
 }
 
-func (f *FeedRepository) InsertFeeds(feeds []*e.Feed) bool {
+func (f *FeedRepository) InsertFeeds(feeds chan e.Feed) bool {
 	insertSQL := `INSERT OR IGNORE INTO Feeds (title, description, provider, link, date, created_at ) VALUES(?,?,?,?,?,?)`
 	stmt, err := f.db.Prepare(insertSQL)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return false
 	}
-	for _, feed := range feeds {
+	for feed := range feeds {
 		_, err = stmt.Exec(feed.Title, feed.Description, feed.Provider, feed.Link, feed.Date, time.Now())
 		if err != nil {
 			log.Fatalln(err.Error())
 			return false
 		}
 	}
-	return true
-}
-
-func (f *FeedRepository) InsertFeed(feed e.Feed) bool {
-	insertSQL := `INSERT OR IGNORE INTO Feeds (title, description, provider, link, date, created_at ) VALUES(?,?,?,?,?,?)`
-	stmt, err := f.db.Prepare(insertSQL)
-	if err != nil {
-		log.Fatalln(err.Error())
-		return false
-	}
-	_, err = stmt.Exec(feed.Title, feed.Description, feed.Provider, feed.Link, feed.Date, time.Now())
-	if err != nil {
-		log.Fatalln(err.Error())
-		return false
-	}
-
 	return true
 }

@@ -55,9 +55,7 @@ func main() {
 		f5 := usecase.ScrapeFeedPage("https://www.moneytimes.com.br/feed/", "moneytimes")
 
 		out := fanIn(f1, f2, f3, f4, f5)
-		for feed := range out {
-			feedRepository.InsertFeed(feed)
-		}
+		feedRepository.InsertFeeds(out)
 
 		fmt.Println("Sleeping for 1 hour ...")
 		fmt.Println()
