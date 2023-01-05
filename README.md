@@ -6,7 +6,6 @@ This project is a rss webcrawler in go, that search for feed post every hour and
 | Name | Version | Notes | Mandatory
 |------|---------|---------|---------|
 | [golang](https://golang.org/dl/) | >= go1.18 | Main programming language | true
-| [sh/bash] | depending on OS. Anyway, you should be able do execute any .sh file | Used to lint checks, test processes and some console interface customizations | true
 | [make](https://www.gnu.org/software/make/) | depending on OS. Anyway, you should be able do execute make commands to run the project, tests and local environment | n/a | true
 
 ### Dependencies
