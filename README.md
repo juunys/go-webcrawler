@@ -1,5 +1,5 @@
 # Go RSS Webcrawler
-This project is a rss webcrawler in go, that search for feed post every hour and store the data in the database.
+This project is a rss webcrawler in go, that search for feed post of selected urls every hour and store the data in the database.
 
 ## Requirements
 
