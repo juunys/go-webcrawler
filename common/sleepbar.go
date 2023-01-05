@@ -19,7 +19,7 @@ func SleepBar() {
 		if count == 20 {
 			break
 		}
-		time.Sleep(3 * time.Minute)
+		time.Sleep(1 * time.Second)
 		percentProgress += 5
 		sleepProgress[count] = "#"
 		fmt.Printf("\r%v ==============> %d%%", sleepProgress, percentProgress)

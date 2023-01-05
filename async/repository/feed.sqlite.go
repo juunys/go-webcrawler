@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"sync"
 	"time"
 
 	e "github.com/juunys/go-webcrawler/async/entity"
@@ -59,19 +60,38 @@ func NewFeedRepository(db *sql.DB) *FeedRepository {
 	}
 }
 
-func (f *FeedRepository) InsertFeeds(feeds chan e.Feed) bool {
+func (f *FeedRepository) InsertFeeds(feeds chan e.Feed) {
+	insertSQL := `INSERT OR IGNORE INTO Feeds (title, description, provider, link, date, created_at ) VALUES(?,?,?,?,?,?)`
+	stmt, err := f.db.Prepare(insertSQL)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+	var wg sync.WaitGroup
+	for feed := range feeds {
+		wg.Add(1)
+		go func(f e.Feed) {
+			defer wg.Done()
+			_, err = stmt.Exec(f.Title, f.Description, f.Provider, f.Link, f.Date, time.Now())
+			if err != nil {
+				log.Fatalln(err.Error())
+			}
+		}(feed)
+	}
+	wg.Wait()
+}
+
+func (f *FeedRepository) InsertFeed(feed e.Feed) bool {
 	insertSQL := `INSERT OR IGNORE INTO Feeds (title, description, provider, link, date, created_at ) VALUES(?,?,?,?,?,?)`
 	stmt, err := f.db.Prepare(insertSQL)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return false
 	}
-	for feed := range feeds {
-		_, err = stmt.Exec(feed.Title, feed.Description, feed.Provider, feed.Link, feed.Date, time.Now())
-		if err != nil {
-			log.Fatalln(err.Error())
-			return false
-		}
+	_, err = stmt.Exec(feed.Title, feed.Description, feed.Provider, feed.Link, feed.Date, time.Now())
+	if err != nil {
+		log.Fatalln(err.Error())
+		return false
 	}
+
 	return true
 }
