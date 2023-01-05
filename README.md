@@ -6,7 +6,7 @@ This project is a rss webcrawler in go, that search for feed post every hour and
 | Name | Version | Notes | Mandatory
 |------|---------|---------|---------|
 | [golang](https://golang.org/dl/) | >= go1.18 | Main programming language | true
-| [make](https://www.gnu.org/software/make/) | depending on OS. Anyway, you should be able do execute make commands to run the project, tests and local environment | n/a | true
+| [make](https://www.gnu.org/software/make/) | Run shortcuts | n/a | false
 
 ### Dependencies
 The mandatory tools/libs to run this webcrawler
