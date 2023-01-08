@@ -43,7 +43,7 @@ func main() {
 			}(feed, chOut)
 		}
 
-		go func(ch chan entity.Feed) {
+		go func() {
 			for {
 				feed, open := <-chOut
 				if !open {
@@ -51,7 +51,7 @@ func main() {
 				}
 				feedRepository.InsertFeed(feed)
 			}
-		}(chOut)
+		}()
 
 		wg.Wait()
 		close(chOut)
