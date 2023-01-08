@@ -2,63 +2,61 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"sync"
 
 	"github.com/juunys/go-webcrawler/async/entity"
 	"github.com/juunys/go-webcrawler/async/repository"
 	"github.com/juunys/go-webcrawler/async/usecase"
 	"github.com/juunys/go-webcrawler/common"
+
 	_ "github.com/mattn/go-sqlite3"
+	"gopkg.in/yaml.v3"
 )
-
-func fanIn(inputs ...chan entity.Feed) chan entity.Feed {
-	var wg sync.WaitGroup
-	out := make(chan entity.Feed)
-
-	wg.Add(len(inputs))
-
-	for _, in := range inputs {
-		go func(ch <-chan entity.Feed) {
-			for {
-				feed, ok := <-ch
-
-				if !ok {
-					wg.Done()
-					break
-				}
-
-				out <- feed
-			}
-		}(in)
-	}
-
-	go func() {
-		wg.Wait()
-		close(out)
-	}()
-
-	return out
-}
 
 func main() {
 	feedRepository := repository.NewFeedRepository(repository.InitSqlite())
+	var feedsSource []entity.FeedYml
+
+	source, err := ioutil.ReadFile("db/feed.yaml")
+	if err != nil {
+		log.Fatalf("error: %v", err)
+	}
+
+	err = yaml.Unmarshal(source, &feedsSource)
+	if err != nil {
+		log.Fatalf("error: %v", err)
+	}
 
 	for {
-		fmt.Print("\n\n")
-		fmt.Println("Scraping url ...")
-		fmt.Print("\n")
+		fmt.Printf("\n\nScraping url ...\n")
 
-		f1 := usecase.ScrapeFeedPage("https://catracalivre.com.br/feed/", "catraca_livre")
-		f2 := usecase.ScrapeFeedPage("https://www.infomoney.com.br/feed/", "infomoney")
-		f3 := usecase.ScrapeFeedPage("https://forbes.com.br/feed/", "forbes")
-		f4 := usecase.ScrapeFeedPage("https://www.cnnbrasil.com.br/feed/", "cnn")
-		f5 := usecase.ScrapeFeedPage("https://www.moneytimes.com.br/feed/", "moneytimes")
+		var wg sync.WaitGroup
+		chOut := make(chan entity.Feed)
 
-		out := fanIn(f1, f2, f3, f4, f5)
-		feedRepository.InsertFeeds(out)
+		wg.Add(len(feedsSource))
+		for _, feed := range feedsSource {
+			go func(f entity.FeedYml, c chan entity.Feed) {
+				defer wg.Done()
+				usecase.ScrapeFeedPage(f.Link, f.Name, c)
+			}(feed, chOut)
+		}
 
-		fmt.Println("Sleeping for 1 hour ...")
-		fmt.Println()
+		go func(ch chan entity.Feed) {
+			for {
+				feed, open := <-chOut
+				if !open {
+					break
+				}
+				feedRepository.InsertFeed(feed)
+			}
+		}(chOut)
+
+		wg.Wait()
+		close(chOut)
+
+		fmt.Print("Sleeping for 1 hour ...\n")
 		common.SleepBar()
 	}
 }

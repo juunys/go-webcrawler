@@ -7,25 +7,20 @@ import (
 	"github.com/mmcdole/gofeed"
 )
 
-func ScrapeFeedPage(link, provider string) chan entity.Feed {
+func ScrapeFeedPage(link, provider string, out chan entity.Feed) chan entity.Feed {
 	fp := gofeed.NewParser()
-	ch := make(chan entity.Feed)
+	feed, _ := fp.ParseURL(link)
 
-	go func(l, p string) {
-		defer close(ch)
-		feed, _ := fp.ParseURL(l)
-
-		for _, item := range feed.Items {
-			ch <- entity.Feed{
-				Title:       item.Title,
-				Description: item.Description,
-				Link:        item.Link,
-				Provider:    p,
-				Date:        item.Published,
-				CreatedAt:   time.Now(),
-			}
+	for _, item := range feed.Items {
+		out <- entity.Feed{
+			Title:       item.Title,
+			Description: item.Description,
+			Link:        item.Link,
+			Provider:    provider,
+			Date:        item.Published,
+			CreatedAt:   time.Now(),
 		}
-	}(link, provider)
+	}
 
-	return ch
+	return out
 }

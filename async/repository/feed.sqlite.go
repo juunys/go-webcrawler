@@ -60,14 +60,15 @@ func NewFeedRepository(db *sql.DB) *FeedRepository {
 	}
 }
 
-func (f *FeedRepository) InsertFeeds(feeds chan e.Feed) {
+func (f *FeedRepository) InsertFeeds(inCh chan e.Feed) {
 	insertSQL := `INSERT OR IGNORE INTO Feeds (title, description, provider, link, date, created_at ) VALUES(?,?,?,?,?,?)`
 	stmt, err := f.db.Prepare(insertSQL)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
+
 	var wg sync.WaitGroup
-	for feed := range feeds {
+	for feed := range inCh {
 		wg.Add(1)
 		go func(f e.Feed) {
 			defer wg.Done()
@@ -78,6 +79,7 @@ func (f *FeedRepository) InsertFeeds(feeds chan e.Feed) {
 		}(feed)
 	}
 	wg.Wait()
+
 }
 
 func (f *FeedRepository) InsertFeed(feed e.Feed) bool {

@@ -10,3 +10,8 @@ type Feed struct {
 	Date        string
 	CreatedAt   time.Time
 }
+
+type FeedYml struct {
+	Name string
+	Link string
+}
