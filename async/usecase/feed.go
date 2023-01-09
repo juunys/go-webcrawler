@@ -7,7 +7,7 @@ import (
 	"github.com/mmcdole/gofeed"
 )
 
-func ScrapeFeedPage(link, provider string, out chan entity.Feed) chan entity.Feed {
+func ScrapeFeedPage(link, provider string, out chan entity.Feed) {
 	fp := gofeed.NewParser()
 	feed, _ := fp.ParseURL(link)
 
@@ -21,6 +21,4 @@ func ScrapeFeedPage(link, provider string, out chan entity.Feed) chan entity.Fee
 			CreatedAt:   time.Now(),
 		}
 	}
-
-	return out
 }
