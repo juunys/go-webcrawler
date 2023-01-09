@@ -1,13 +1,15 @@
 package usecase
 
 import (
+	"sync"
 	"time"
 
 	"github.com/juunys/go-webcrawler/async/entity"
 	"github.com/mmcdole/gofeed"
 )
 
-func ScrapeFeedPage(link, provider string, out chan entity.Feed) {
+func ScrapeFeedPage(link, provider string, out chan entity.Feed, wg *sync.WaitGroup) {
+	defer wg.Done()
 	fp := gofeed.NewParser()
 	feed, _ := fp.ParseURL(link)
 

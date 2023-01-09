@@ -37,10 +37,7 @@ func main() {
 
 		wg.Add(len(feedsSource))
 		for _, feed := range feedsSource {
-			go func(f entity.FeedYml) {
-				defer wg.Done()
-				usecase.ScrapeFeedPage(f.Link, f.Name, chOut)
-			}(feed)
+			go usecase.ScrapeFeedPage(feed.Link, feed.Name, chOut, &wg)
 		}
 
 		go func() {
