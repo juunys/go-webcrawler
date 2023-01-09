@@ -16,9 +16,7 @@ import (
 )
 
 func main() {
-	feedRepository := repository.NewFeedRepository(repository.InitSqlite())
 	var feedsSource []entity.FeedYml
-
 	source, err := ioutil.ReadFile("db/feed.yaml")
 	if err != nil {
 		log.Fatalf("error: %v", err)
@@ -26,14 +24,18 @@ func main() {
 
 	err = yaml.Unmarshal(source, &feedsSource)
 	if err != nil {
-		log.Fatalf("error: %v", err)
+		log.Panicf("error: %v", err)
 	}
+
+	feedRepository := repository.NewFeedRepository(repository.InitSqlite())
 
 	for {
 		fmt.Printf("\n\nScraping url ...\n")
 
 		var wg sync.WaitGroup
+		var m sync.Mutex
 		chOut := make(chan entity.Feed)
+		scrappedCount := 0
 
 		wg.Add(len(feedsSource))
 		for _, feed := range feedsSource {
@@ -47,11 +49,17 @@ func main() {
 					break
 				}
 				feedRepository.InsertFeed(feed)
+				m.Lock()
+				scrappedCount++
+				m.Unlock()
 			}
 		}()
 
 		wg.Wait()
 		close(chOut)
+		m.Lock()
+		fmt.Printf("Scrapped %d items\n\n", scrappedCount)
+		m.Unlock()
 
 		fmt.Print("Sleeping for 1 hour ...\n")
 		common.SleepBar()
