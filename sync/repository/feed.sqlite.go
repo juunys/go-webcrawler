@@ -6,21 +6,27 @@ import (
 	"os"
 	"time"
 
-	e "github.com/juunys/go-webcrawler/sync/entity"
+	e "github.com/juunys/go-webcrawler/entity"
 )
 
 type FeedRepository struct {
 	db *sql.DB
 }
 
-func InitSqlite() *sql.DB {
+func NewFeedRepository(db *sql.DB) *FeedRepository {
+	return &FeedRepository{
+		db: db,
+	}
+}
+
+func InitSqlite() (*sql.DB, error) {
 	path := "db/development.sqlite3"
 	file, err := os.Stat(path)
 	if err != nil || file.Size() <= 0 {
 		log.Println("Creating development.sqlite3...")
 		file, err := os.Create(path)
 		if err != nil {
-			log.Fatal(err.Error())
+			return nil, err
 		}
 		defer file.Close()
 		log.Println("development.sqlite3 created")
@@ -28,7 +34,7 @@ func InitSqlite() *sql.DB {
 
 	db, err := sql.Open("sqlite3", path)
 	if err != nil {
-		log.Fatal(err.Error())
+		return nil, err
 	}
 
 	const createFeedTable string = `
@@ -45,18 +51,12 @@ func InitSqlite() *sql.DB {
 	log.Println("Create feed table...")
 	statement, err := db.Prepare(createFeedTable)
 	if err != nil {
-		log.Fatal(err.Error())
+		return nil, err
 	}
 
 	statement.Exec()
 	log.Println("feed table created")
-	return db
-}
-
-func NewFeedRepository(db *sql.DB) *FeedRepository {
-	return &FeedRepository{
-		db: db,
-	}
+	return db, nil
 }
 
 func (f *FeedRepository) InsertFeeds(feeds []*e.Feed) bool {

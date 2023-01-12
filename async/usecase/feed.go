@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/juunys/go-webcrawler/async/entity"
+	"github.com/juunys/go-webcrawler/entity"
 	"github.com/mmcdole/gofeed"
 )
 

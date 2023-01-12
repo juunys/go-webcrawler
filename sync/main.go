@@ -4,33 +4,36 @@ import (
 	"fmt"
 
 	"github.com/juunys/go-webcrawler/common"
-	"github.com/juunys/go-webcrawler/sync/entity"
+	"github.com/juunys/go-webcrawler/entity"
 	"github.com/juunys/go-webcrawler/sync/repository"
 	"github.com/juunys/go-webcrawler/sync/usecase"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
-	feedRepository := repository.NewFeedRepository(repository.InitSqlite())
+	app, err := common.NewApp()
+	if err != nil {
+		panic(err.Error())
+	}
 
-	providers := []string{"catraca_livre", "infomoney", "forbes", "cnn", "moneytimes"}
-	urlFeed := []string{"https://catracalivre.com.br/feed/", "https://www.infomoney.com.br/feed/", "https://forbes.com.br/feed/", "https://www.cnnbrasil.com.br/feed/", "https://www.moneytimes.com.br/feed/"}
+	db, err := repository.InitSqlite()
+	if err != nil {
+		panic(err.Error())
+	}
+	feedRepository := repository.NewFeedRepository(db)
 
 	for {
-		fmt.Print("\n\n")
-		fmt.Println("Scraping url ...")
-		fmt.Print("\n")
+		fmt.Printf("\n\nScraping url ...\n")
 		var feeds = []*entity.Feed{}
 
-		for index, url := range urlFeed {
-			generatedFeed := usecase.ScrapeFeedPage(url, providers[index])
+		for _, feed := range app.Source {
+			generatedFeed := usecase.ScrapeFeedPage(feed.Link, feed.Name)
 			feeds = append(feeds, generatedFeed...)
 		}
 
 		feedRepository.InsertFeeds(feeds)
 
-		fmt.Println("Sleeping for 1 hour ...")
-		fmt.Println()
+		fmt.Printf("Sleeping for 1 hour ...\n")
 		common.SleepBar()
 	}
 }

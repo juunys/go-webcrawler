@@ -2,32 +2,27 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"log"
 	"sync"
 
-	"github.com/juunys/go-webcrawler/async/entity"
 	"github.com/juunys/go-webcrawler/async/repository"
 	"github.com/juunys/go-webcrawler/async/usecase"
 	"github.com/juunys/go-webcrawler/common"
+	"github.com/juunys/go-webcrawler/entity"
 
 	_ "github.com/mattn/go-sqlite3"
-	"gopkg.in/yaml.v3"
 )
 
 func main() {
-	var feedsSource []entity.FeedYml
-	source, err := ioutil.ReadFile("db/feed.yaml")
+	app, err := common.NewApp()
 	if err != nil {
-		log.Fatalf("error: %v", err)
+		panic(err.Error())
 	}
 
-	err = yaml.Unmarshal(source, &feedsSource)
+	db, err := repository.InitSqlite()
 	if err != nil {
-		log.Panicf("error: %v", err)
+		panic(err.Error())
 	}
-
-	feedRepository := repository.NewFeedRepository(repository.InitSqlite())
+	feedRepository := repository.NewFeedRepository(db)
 
 	for {
 		fmt.Printf("\n\nScraping url ...\n")
@@ -37,8 +32,8 @@ func main() {
 		chOut := make(chan entity.Feed)
 		scrappedCount := 0
 
-		wg.Add(len(feedsSource))
-		for _, feed := range feedsSource {
+		wg.Add(len(app.Source))
+		for _, feed := range app.Source {
 			go usecase.ScrapeFeedPage(feed.Link, feed.Name, chOut, &wg)
 		}
 
